@@ -10,42 +10,50 @@ require_relative 'nanosynth_seqmod'
 # it be more efficient to call writer.write here
 # building buffers for each 'note'
 
-#SEQUENCE_BUFFER is an array of hashes containing notes
-SEQUENCE_BUFFER = []
-SEQUENCE_LOG = "START SEQUENCE_LOG: "
+#sequence_buffer is an array of hashes containing notes
 OUTPUT_FILENAME = "My_Song.wav"
+sequence_log = "START sequence_log: "
+sequence_buffer = [] #sequence_buffer is an array of hashes containing notes
 
-puts "[Wave Type] [Frequency] [Max Amplitude] [Length]"
-sequence = STDIN.gets.chomp.split(" ")
-binding.pry
+def write_song_buffer
+  puts "Please enter your sequence. [Wave Type] [Frequency] [Max Amplitude] [Length]"
+  sequence_input = STDIN.gets.chomp.split(" ")
 
-if !(sequence.size%4 == 0)
-  puts "Please make sure you have the right number of arguments per note and run again."
-  puts "[Wave Type] [Frequency] [Max Amplitude] [Length]"
-  abort
-end
-
-sequence.each_slice(4) do |a, b, c, d|
-  note_hash = {}
-  note_hash[:wave_type] = a
-  note_hash[:frequency] = b
-  note_hash[:max_amplitude] = c
-  note_hash[:length] =  d
-  if SEQUENCE_BUFFER.class == Array
-    SEQUENCE_BUFFER = buffer(note_hash)
-  else
-    SEQUENCE_BUFFER.samples << buffer(note_hash).samples
-    SEQUENCE_BUFFER.samples.flatten!
+  if !(sequence_input.size%4 == 0)
+    puts "Please make sure you have the right number of arguments per note and run again."
+    puts "[Wave Type] [Frequency] [Max Amplitude] [Length]"
+    abort
   end
-  SEQUENCE_LOG += "#{a} #{b} #{c} #{d}"
+
+  sequence_input.each_slice(4) do |a, b, c, d|
+    note_hash = {}
+    note_hash[:wave_type] = a
+    note_hash[:frequency] = b
+    note_hash[:max_amplitude] = c
+    note_hash[:length] =  d
+    if sequence_buffer.class == Array
+      sequence_buffer = buffer(note_hash)
+    else
+      sequence_buffer.samples << buffer(note_hash).samples
+      sequence_buffer.samples.flatten!
+    end
+    sequence_log += "#{a} #{b} #{c} #{d}"
+  end
+
 end
 
-WaveFile::Writer.new(OUTPUT_FILENAME, WaveFile::Format.new(:mono, :pcm_24, SAMPLE_RATE)) do |writer|
-  writer.write(SEQUENCE_BUFFER)
+
+def write_audio
+  WaveFile::Writer.new(OUTPUT_FILENAME, WaveFile::Format.new(:mono, :pcm_24, SAMPLE_RATE)) do |writer|
+    writer.write(sequence_buffer)
+  end
 end
 
-
-File.new("My_Song_Sequences.txt", "a+")
-File.open("My_Song_Sequences.txt", "a") do |line|
-  line.puts SEQUENCE_LOG
+def write_sequence_log
+  File.new("My_Song_Sequences.txt", "a+")
+  File.open("My_Song_Sequences.txt", "a") do |line|
+    line.puts sequence_log
+  end
 end
+
+write_song_buffer
