@@ -1,7 +1,7 @@
 gem 'wavefile', '=0.8.1'
 require 'wavefile'
 require 'pry'
-require_relative 'nanosynth_seqmod'
+require_relative 'nanosynth'
 
 #need to systematically generate a hash for every 4 inputs.
 #use .length on the array, divide by 5
@@ -10,12 +10,10 @@ require_relative 'nanosynth_seqmod'
 # it be more efficient to call writer.write here
 # building buffers for each 'note'
 
-#sequence_buffer is an array of hashes containing notes
 OUTPUT_FILENAME = "My_Song.wav"
-sequence_log = "START sequence_log: "
-sequence_buffer = [] #sequence_buffer is an array of hashes containing notes
+SEQUENCE_LOG = ["START SEQUENCE_LOG:"]
 
-def write_song_buffer
+def generate_sequence_buffer
   puts "Please enter your sequence. [Wave Type] [Frequency] [Max Amplitude] [Length]"
   sequence_input = STDIN.gets.chomp.split(" ")
 
@@ -25,6 +23,7 @@ def write_song_buffer
     abort
   end
 
+  sequence_buffer = []
   sequence_input.each_slice(4) do |a, b, c, d|
     note_hash = {}
     note_hash[:wave_type] = a
@@ -37,13 +36,14 @@ def write_song_buffer
       sequence_buffer.samples << buffer(note_hash).samples
       sequence_buffer.samples.flatten!
     end
-    sequence_log += "#{a} #{b} #{c} #{d}"
+    SEQUENCE_LOG.push("#{a} #{b} #{c} #{d}")
+    binding.pry
   end
-
+  sequence_buffer
 end
 
 
-def write_audio
+def write_audio(sequence_buffer)
   WaveFile::Writer.new(OUTPUT_FILENAME, WaveFile::Format.new(:mono, :pcm_24, SAMPLE_RATE)) do |writer|
     writer.write(sequence_buffer)
   end
@@ -52,8 +52,6 @@ end
 def write_sequence_log
   File.new("My_Song_Sequences.txt", "a+")
   File.open("My_Song_Sequences.txt", "a") do |line|
-    line.puts sequence_log
+    line.puts SEQUENCE_LOG.join
   end
 end
-
-write_song_buffer
