@@ -28,37 +28,44 @@
 ###
 ### http://www.joelstrait.com/nanosynth_create_sound_with_ruby/
 
+####removed 'tone'input added by rivsec.
+####edited output_filename to only accept entered paramter.
+####edited 'main' to be called by another file
+####edited SECONDS_TO_GENERATE to be a variable, length, to be sent from nanoseq
+####edited 'main' to return buffer value instead, to be written by nanoseq.rb
+####edited length and sample rate to allow for floats lengths (less than a second)
+####upped the sample rate to 48k and 24 bit
+
 gem 'wavefile', '=0.8.1'
 require 'wavefile'
 require 'pry'
 
-SAMPLE_RATE = 44100
-SECONDS_TO_GENERATE = 1
+SAMPLE_RATE = 48000
 TWO_PI = 2 * Math::PI
 RANDOM_GENERATOR = Random.new
 
-def main(params)
+
+def buffer(params)
   wave_type = params[:wave_type].to_sym    # Should be "sine", "square", "saw", "triangle", or "noise"
   frequency = params[:frequency].to_f      # 440.0 is the same as middle-A on a piano.
   max_amplitude = params[:max_amplitude].to_f  # Should be between 0.0 (silence) and 1.0 (full volume).
-                                                # Amplitudes above 1.0 will result in distortion (or other weirdness).
-  tone = params[:tone]
-
-  output_filename = params[:output_filename] || "#{wave_type}_#{(tone || frequency)}_#{max_amplitude}.wav" # Filename specified or build with params of sound wave
-
+                                             # Amplitudes above 1.0 will result in distortion (or other weirdness).
+  output_filename = params[:output_filename] # Filename specified
+  length = params[:length].to_f #length of the sample in seconds
+  sample_rate = (SAMPLE_RATE * length).to_i
   # Generate 1 second of sample data at the given frequency and amplitude.
   # Since we are using a specific sample rate measured in samples per second, that many samples are required for one second of sound.
-  samples = generate_sample_data(wave_type, SAMPLE_RATE * SECONDS_TO_GENERATE, frequency, max_amplitude)
+  samples = generate_sample_data(wave_type, sample_rate, frequency, max_amplitude)
 
   # Wrap the array of samples in a Buffer, so that it can be written to a Wave file
   # by the WaveFile gem. Since we generated samples between -1.0 and 1.0, the sample
   # type should be :float
   buffer = WaveFile::Buffer.new(samples, WaveFile::Format.new(:mono, :float, SAMPLE_RATE))
-  binding.pry
+
   # Write the Buffer containing our samples to a monophonic Wave file
-  WaveFile::Writer.new(output_filename, WaveFile::Format.new(:mono, :pcm_16, SAMPLE_RATE)) do |writer|
-    writer.write(buffer)
-  end
+  #WaveFile::Writer.new(output_filename, #WaveFile::Format.new(:mono, :pcm_16, SAMPLE_RATE)) do |writer|
+  #  writer.write(buffer)
+  #end
 end
 
 # The dark heart of NanoSynth, the part that actually generates the audio data
@@ -96,6 +103,3 @@ def generate_sample_data(wave_type, num_samples, frequency, max_amplitude)
 
   samples
 end
-
-# Read the command-line arguments.
-main({ wave_type: ARGV[0], frequency: ARGV[1], max_amplitude: ARGV[2], tone: ARGV[3]})
