@@ -1,1 +1,1 @@
-START SEQUENCE_LOG:sine 440.0 1.0 0.5triangle 200 1.0 0.3sine 440.0 1.0 0.5triangle 200 1.0 0.3square 200 1.0 0.3triangle 500 1.0 0.3saw 200 1.0 0.3saw 600 1.0 0.3triangle 200 1.0 0.3triangle 200 1.0 0.3triangle 200 1.0 0.3
+START SEQUENCE_LOG: Square 440 1 1 Sine 220 1 1 Triangle 660 1 1
