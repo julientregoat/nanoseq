@@ -3,7 +3,8 @@ require 'wavefile'
 require 'pry'
 require_relative 'nanosynth'
 require_relative 'nanoseq'
+require_relative 'interface.rb'
 
-
-write_audio(generate_sequence_buffer)
-write_sequence_log
+welcome
+program_loop
+goodbye
