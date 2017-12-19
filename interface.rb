@@ -19,6 +19,7 @@ def sequence_mode?
   puts "Type 'current' to view current sequence."
   puts "Type 'change' to change the sequence you're working on."
   puts "Type 'save' to save the current sequence to a text file and export audio."
+  puts "Type 'load' to load a new sequence from a text file."
 end
 
 def add_note_which_id?
@@ -87,7 +88,6 @@ def program_loop
         response = gets.chomp.downcase
         change_sequence = nil
         while change_sequence == nil
-          binding.pry
           change_sequence = Sequence.sequence_switch(response)
           if change_sequence == nil
             puts "Sequence not found. Try again, or type 'exit'."
@@ -101,6 +101,11 @@ def program_loop
         save_warning
         current_sequence.generate_sequence_buffer
         current_sequence.write_audio
+        current_sequence.write_note_log
+      elsif response == "load"
+        puts "Type a name for your new sequence."
+        response = gets.chomp
+        Sequence.new(response).read_sequence_file
       else
         puts "Invalid entry or no current sequence. Please create a new sequence."
       end

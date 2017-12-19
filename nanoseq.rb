@@ -59,7 +59,7 @@ end
 class Sequence
   attr_accessor :name, :buffer, :output_filename, :sequence
 
-  SEQUENCE_LOG = ["START SEQUENCE LOG:"]
+  NOTE_LOG = [""]
   OUTPUT_FILENAME = "My_Song.wav"
 
   @@all = []
@@ -98,7 +98,6 @@ class Sequence
 
   def delete_note_by_index(index)
     @sequence.delete_if.with_index do |note, idx|
-      binding.pry
       idx == index
     end
   end
@@ -109,7 +108,7 @@ class Sequence
 
   def generate_sequence_buffer
     sequence_buffer = []
-    @sequence.each do |note|
+    @sequence.each_with_index do |note, idx|
       note_hash = {}
       note_hash[:wave_type] = note.wave_type
       note_hash[:frequency] = note.frequency
@@ -121,7 +120,7 @@ class Sequence
         sequence_buffer.samples << buffergen(note_hash).samples
         sequence_buffer.samples.flatten!
       end
-      SEQUENCE_LOG.push(" #{note.id} #{note.wave_type} #{note.frequency} #{note.amplitude} #{note.length}")
+      NOTE_LOG.push("index#{idx} #{note.id} #{note.wave_type} #{note.frequency} #{note.amplitude} #{note.length}\n")
     end
     @buffer = sequence_buffer
   end
@@ -132,17 +131,27 @@ class Sequence
     end
   end
 
-  def write_sequence_log
+  def write_note_log
     File.new("My_Song_Sequences.txt", "a+")
     File.open("My_Song_Sequences.txt", "a") do |line|
-      line.puts SEQUENCE_LOG.join
+      line.puts NOTE_LOG.join
     end
   end
-  # def read_sequence_file
-  #   puts "Please ensure your .txt file is in the same directory as Nanoseq."
-  #   puts "Type the full file name of the sequence you want to read from."
-  #
-  #   File.open(STDIN.gets.chomp) do |line.|
+
+  def read_sequence_file
+    puts "Please ensure your .txt file is in the same directory as Nanoseq."
+    puts "Type the full file name of the sequence you want to read from."
+    File.open(STDIN.gets.chomp) do |file|
+      file.each.with_index do |line, idx|
+        lineary = line.split
+        if Note.find_note_by_id(lineary[1]) == nil
+          Note.new(lineary[1],lineary[2],lineary[3],lineary[4], lineary[5])
+        end
+        @sequence[idx] = Note.find_note_by_id(lineary[1])
+      end
+    end
+    self.all_notes
+  end
 end
 
 # puts "Please enter your sequence. [Wave Type] [Frequency] [Max Amplitude] [Length]"
