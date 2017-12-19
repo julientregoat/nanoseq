@@ -79,10 +79,14 @@ def program_loop
           current_sequence.add_note_by_id(response)
         end
       elsif response == "delete"
-        puts "Enter the index of the note you'd like to delete."
-        current_sequence.all_notes
-        response = gets.chomp.to_i
-        current_sequence.delete_note_by_index(response)
+        if current_sequence.class == NilClass
+          puts "No current sequence. Try again."
+        else
+          puts "Enter the index of the note you'd like to delete."
+          current_sequence.all_notes
+          response = gets.chomp.to_i
+          current_sequence.delete_note_by_index(response)
+        end
       elsif response == "change"
         puts "Type the name of the sequence you'd like to change to."
         response = gets.chomp.downcase
